@@ -35,4 +35,12 @@ Aplikacja To-Do List umożliwia zarządzanie codziennymi zadaniami. Pozwala na d
 ## **📋 Wymagania**
 - Python 3.8 lub nowszy.
 - Edytor kodu lub IDE (np. PyCharm, VS Code).
--
+- Opcjonalnie: Wirtualne środowisko Python (`venv`).
+
+---
+
+## **📦 Instalacja**
+1. Sklonuj repozytorium:
+   ```bash
+   git clone https://github.com/uzytkownik/to-do-list-app.git
+   cd to-do-list-app
