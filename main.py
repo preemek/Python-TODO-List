@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 
-FILE_PATH = "/to_do_list/zadania.json"
+FILE_PATH = "zadania.json"
 
 
 class Task:
@@ -28,7 +28,7 @@ class TaskManager:
     def load_tasks(self):
 
         try:
-             with open(FILE_PATH, r) as file:
+             with open(FILE_PATH, 'r') as file:
                   tasks_data = json.load(file)
                   tasks = [Task(task['title'], task['description'], task['due_date']) for task in tasks_data]
         except (FileNotFoundError, json.JSONDecodeError):
@@ -95,7 +95,7 @@ class TaskApp:
 
           self.listbox_tasks = tk.Listbox(self.root, width=50, height=10)
           self.listbox_tasks.pack()
-          self.listbox_tasks.bind("<ListboxSelect>", self.show_task_details)
+          self.listbox_tasks.bind("<<ListboxSelect>>", self.show_task_details)
 
           self.label_task_details = tk.Label(self.root, text="Szczegóły zadania:")
           self.label_task_details.pack()
@@ -111,8 +111,56 @@ class TaskApp:
           for task in self.task_manager.tasks:
                self.listbox_tasks.insert(tk.END, str(task))
 
-     def show_task_details(self):
+     def show_task_details(self, event):
+          selected_task_index = self.listbox_tasks.curselection()
+          if selected_task_index:
+               idx = selected_task_index[0]
+               task = self.task_manager.tasks[idx]
+               self.label_task_details.config(text=f"Tytuł: {task.title}\nOpis: {task.description}\nTermin: {task.due_date}\nStatus: {task.status} ")
 
+     def add_task(self):
+          title = self.entry_title.get()
+          description = self.entry_description.get()
+          due_date = self.entry_due_date.get()
+          
+          try:
+               due_date_obj = datetime.strptime(due_date, '%Y-%m-%d')
+          except ValueError:
+               messagebox.showerror("Błąd", "Niepoprawny format daty. Użyj formatu RRRR-MM-DD.")
+               return
+
+          self.task_manager.add_task(title, description, due_date)
+          self.update_task_list()
+
+     def mark_task_done(self):
+          selected_task_index = self.listbox_tasks.curselection()
+          if selected_task_index:
+               idx = selected_task_index[0]
+               task = self.task_manager.tasks[idx]
+               self.task_manager.delete_task(task)
+               self.update_task_list()
+
+     def delete_task(self):
+    
+          selected_task_index = self.listbox_tasks.curselection()
+          if selected_task_index:
+               idx = selected_task_index[0]
+               task = self.task_manager.tasks[idx]
+               self.task_manager.delete_task(task)
+               self.update_task_list()
+
+
+root = tk.Tk()
+root.title("Zarządzanie zadaniami")
+
+
+task_manager = TaskManager()
+
+
+app = TaskApp(root, task_manager)
+
+
+root.mainloop()
 
 
 
