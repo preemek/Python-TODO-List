@@ -1,44 +1,7 @@
 import tkinter
 from tkinter import messagebox, simpledialog
-import json
 from datetime import datetime
-
-
-FILE_NAME = "zadania.json"
-
-class TaskManager:
-    def __init__(self, file_name):
-        self.file_name = file_name
-        self.tasks = self.load_tasks()
-        self.save_tasks()
-
-    def load_tasks(self):
-        try:
-            with open(self.file_name, "r") as file:
-                return json.load(file)
-        except (FileNotFoundError, json.JSONDecodeError):
-            return []
-    def save_tasks(self):
-        with open(self.file_name, "w") as file:
-            json.dump(self.tasks, file, indent=4)
-    def add_task(self, title, description, deadline, priority):
-        task = {
-            "title": title,
-            "description": description,
-            "deadline": deadline,
-            "priority": priority,
-            "done": False
-        }
-        self.tasks.append(task)
-        self.save_tasks()
-
-    def mark_task_done(self, index):
-        self.tasks[index]["done"] = True
-        self.save_tasks()
-
-    def delete_task(self, index):
-        self.tasks.pop(index)
-        self.save_tasks()
+from task_manager import TaskManager
 
 class TaskApp:
     def __init__(self, root, manager):
@@ -91,6 +54,12 @@ class TaskApp:
         for task in self.manager.tasks:
             status = "[X]" if task["done"] else "[ ]"
             self.task_list.insert(tkinter.END, f"{status} {task['title']} ({task['priority']}, {task['deadline']})")
-
-
-
+    
+    def notify_deadlines(self):
+        today = datetime.now().date()
+        for task in self.manager.tasks:
+            if not task["done"]:
+                deadline = datetime.strptime(task["deadline"], "%Y-%m-%d").date()
+                days_left = (deadline - today).days
+                if days_left == 1:
+                    messagebox.showinfo("Przypomnienie", f"Zadanie '{task['title']}' ma termin jutro!")

@@ -1,0 +1,16 @@
+[
+    {
+        "title": "Zrobi\u0107 zakupy",
+        "description": "Kupi\u0107 chleb, mleko, mieso",
+        "deadline": "2025-01-31",
+        "priority": "\u015bredni",
+        "done": true
+    },
+    {
+        "title": "Zrobic zakupy",
+        "description": "mleko...",
+        "deadline": "2025-02-20",
+        "priority": "sredni",
+        "done": true
+    }
+]
