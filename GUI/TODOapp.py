@@ -65,10 +65,11 @@ class ScrollableFrameTask(ctk.CTkScrollableFrame):
 class DetailsFrameTask(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
+        self.grid_columnconfigure(0, weight=1)
 
-        self.textbox = ctk.CTkTextbox(self, width=300, height=30, corner_radius=6)
-        self.textbox.grid(row=0, column=0, sticky="nsew")
-        self.textbox.insert("0.0", "Some example text!\n" * 3)
+        self.textbox = ctk.CTkTextbox(self, height=60, corner_radius=6)
+        self.textbox.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
+        self.textbox.insert("0.0", "Some example text!\n" * 5)
 
 
 
@@ -96,9 +97,9 @@ class MainFrameForTask(ctk.CTkFrame):
 
         self.title_label = ctk.CTkLabel(self, text=self.title, fg_color='gray30', corner_radius=6)
         self.title_label.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nsew")
-        self.radio_frame_task = ScrollableFrameTask(self,height=250)
+        self.radio_frame_task = ScrollableFrameTask(self,height=285)
         self.radio_frame_task.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
-        self.task_details = DetailsFrameTask(self, height=20)
+        self.task_details = DetailsFrameTask(self)
         self.task_details.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
         self.buttons_frame_task = ButtonFrameTask(self)
         self.buttons_frame_task.grid(row=3, column=0, padx=5, pady=5, sticky="nsew")
