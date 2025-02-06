@@ -1,22 +1,41 @@
 import customtkinter as ctk
 
+
+class ButtonFrameList(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+        self.master = master
+        self.grid_columnconfigure((0,1), weight=1)
+        self.button_new_list = ctk.CTkButton(self, text="my button"
+                                             , command=self.new_list_command, corner_radius=6)
+        self.button.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
+
+    def new_list_command(self):
+        pass
+
+
+
 class MainFrameForList(ctk.CTkFrame):
     def __init__(self, master, title):
         super().__init__(master)
         self.master = master
         self.title = title
+        self.grid_columnconfigure(0, weight=1)
 
         self.title_label = ctk.CTkLabel(self, text=self.title, fg_color='gray30', corner_radius=6)
-        self.title_label.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="ew")
+        self.title_label.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nsew")
+
 
 class MainFrameForTask(ctk.CTkFrame):
     def __init__(self, master, title):
         super().__init__(master)
         self.master = master
         self.title = title
+        self.grid_columnconfigure(0, weight=1)
 
         self.title_label = ctk.CTkLabel(self, text=self.title, fg_color='gray30', corner_radius=6)
-        self.title_label.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="ew")
+        self.title_label.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nsew")
+
 
 
 
