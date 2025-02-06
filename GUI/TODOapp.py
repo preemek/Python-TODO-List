@@ -1,7 +1,5 @@
 import customtkinter as ctk
 
-
-
 class ButtonFrameList(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
@@ -18,6 +16,7 @@ class ButtonFrameList(ctk.CTkFrame):
         pass
     def delete_list_command(self):
         pass
+
 
 class ButtonFrameTask(ctk.CTkFrame):
     def __init__(self, master):
@@ -36,6 +35,7 @@ class ButtonFrameTask(ctk.CTkFrame):
     def delete_task_command(self):
         pass
 
+
 class ScrollableFrameList(ctk.CTkScrollableFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
@@ -45,7 +45,7 @@ class ScrollableFrameList(ctk.CTkScrollableFrame):
 
         for i, l in enumerate(self.lists):
             radiobutton = ctk.CTkRadioButton(self, text=l, value=l, variable=self.variable)
-            radiobutton.grid(row=i + 1, column=0, padx=10, pady=(10, 0), sticky="w")
+            radiobutton.grid(row=i, column=0, padx=10, pady=(10, 0), sticky="w")
             self.radiobuttons.append(radiobutton)
 
 
@@ -55,10 +55,13 @@ class ScrollableFrameTask(ctk.CTkScrollableFrame):
         self.radiobuttons = []
         self.variable = ctk.StringVar(value="")
         self.tasks = ['Task 1', 'Task 2', 'Task 3']
+        self.grid_columnconfigure((0, 1, 2), weight=1)
 
         for i, t in enumerate(self.tasks):
             radiobutton = ctk.CTkRadioButton(self, text=t, value=t, variable=self.variable)
-            radiobutton.grid(row=i + 1, column=0, padx=10, pady=(10, 0), sticky="w")
+            radiobutton.grid(row=i, column=0, padx=10, pady=(10, 0), sticky="w")
+            label = ctk.CTkLabel(self, text="2025-02-06", fg_color="transparent")
+            label.grid(row=i, column=1, padx=10, pady=10, sticky="ew")
             self.radiobuttons.append(radiobutton)
 
 
@@ -70,7 +73,6 @@ class DetailsFrameTask(ctk.CTkFrame):
         self.textbox = ctk.CTkTextbox(self, height=60, corner_radius=6)
         self.textbox.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
         self.textbox.insert("0.0", "Some example text!\n" * 5)
-
 
 
 class MainFrameForList(ctk.CTkFrame):
@@ -103,8 +105,6 @@ class MainFrameForTask(ctk.CTkFrame):
         self.task_details.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
         self.buttons_frame_task = ButtonFrameTask(self)
         self.buttons_frame_task.grid(row=3, column=0, padx=5, pady=5, sticky="nsew")
-
-
 
 
 class TODOapp(ctk.CTk):
