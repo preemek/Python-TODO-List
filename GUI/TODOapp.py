@@ -1,6 +1,7 @@
 import customtkinter as ctk
 
 
+
 class ButtonFrameList(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
@@ -36,8 +37,8 @@ class ButtonFrameTask(ctk.CTkFrame):
         pass
 
 class ScrollableFrameList(ctk.CTkScrollableFrame):
-    def __init__(self, master):
-        super().__init__(master)
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
         self.radiobuttons = []
         self.variable = ctk.StringVar(value="")
         self.lists = ['Lista 1', 'Lista 2', 'Lista 3']
@@ -49,8 +50,8 @@ class ScrollableFrameList(ctk.CTkScrollableFrame):
 
 
 class ScrollableFrameTask(ctk.CTkScrollableFrame):
-    def __init__(self, master):
-        super().__init__(master)
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
         self.radiobuttons = []
         self.variable = ctk.StringVar(value="")
         self.tasks = ['Task 1', 'Task 2', 'Task 3']
@@ -60,6 +61,14 @@ class ScrollableFrameTask(ctk.CTkScrollableFrame):
             radiobutton.grid(row=i + 1, column=0, padx=10, pady=(10, 0), sticky="w")
             self.radiobuttons.append(radiobutton)
 
+
+class DetailsFrameTask(ctk.CTkFrame):
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
+
+        self.textbox = ctk.CTkTextbox(self, width=300, height=30, corner_radius=6)
+        self.textbox.grid(row=0, column=0, sticky="nsew")
+        self.textbox.insert("0.0", "Some example text!\n" * 3)
 
 
 
@@ -72,7 +81,7 @@ class MainFrameForList(ctk.CTkFrame):
 
         self.title_label = ctk.CTkLabel(self, text=self.title, fg_color='gray30', corner_radius=6)
         self.title_label.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nsew")
-        self.radio_frame_list = ScrollableFrameList(self)
+        self.radio_frame_list = ScrollableFrameList(self, height=355)
         self.radio_frame_list.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
         self.buttons_frame_list = ButtonFrameList(self)
         self.buttons_frame_list.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
@@ -87,10 +96,12 @@ class MainFrameForTask(ctk.CTkFrame):
 
         self.title_label = ctk.CTkLabel(self, text=self.title, fg_color='gray30', corner_radius=6)
         self.title_label.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nsew")
-        self.radio_frame_task = ScrollableFrameTask(self)
+        self.radio_frame_task = ScrollableFrameTask(self,height=250)
         self.radio_frame_task.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
+        self.task_details = DetailsFrameTask(self, height=20)
+        self.task_details.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
         self.buttons_frame_task = ButtonFrameTask(self)
-        self.buttons_frame_task.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
+        self.buttons_frame_task.grid(row=3, column=0, padx=5, pady=5, sticky="nsew")
 
 
 
@@ -101,6 +112,8 @@ class TODOapp(ctk.CTk):
 
         self.title("my app")
         self.geometry("800x500")
+        self.minsize(800, 500)
+        self.maxsize(800, 500)
         ctk.set_appearance_mode('dark')
         ctk.set_default_color_theme('dark-blue')
         self.grid_columnconfigure((0, 1), weight=1)
