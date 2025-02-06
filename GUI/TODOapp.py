@@ -55,13 +55,17 @@ class ScrollableFrameTask(ctk.CTkScrollableFrame):
         self.radiobuttons = []
         self.variable = ctk.StringVar(value="")
         self.tasks = ['Task 1', 'Task 2', 'Task 3']
-        self.grid_columnconfigure((0, 1, 2), weight=1)
+        self.grid_columnconfigure((0, 1, 2, 3), weight=1)
 
         for i, t in enumerate(self.tasks):
             radiobutton = ctk.CTkRadioButton(self, text=t, value=t, variable=self.variable)
-            radiobutton.grid(row=i, column=0, padx=10, pady=(10, 0), sticky="w")
-            label = ctk.CTkLabel(self, text="2025-02-06", fg_color="transparent")
-            label.grid(row=i, column=1, padx=10, pady=10, sticky="ew")
+            radiobutton.grid(row=i, column=0, padx=5, pady=(5, 0), sticky="w")
+            label_date = ctk.CTkLabel(self, text="2025-02-06", fg_color="transparent")
+            label_date.grid(row=i, column=1, padx=5, pady=5, sticky="ew")
+            label_status = ctk.CTkLabel(self, text="In progress", fg_color="transparent")
+            label_status.grid(row=i, column=2, padx=5, pady=5, sticky="ew")
+            label_status = ctk.CTkLabel(self, text="High", fg_color="transparent")
+            label_status.grid(row=i, column=3, padx=5, pady=5, sticky="ew")
             self.radiobuttons.append(radiobutton)
 
 
