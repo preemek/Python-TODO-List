@@ -1,4 +1,6 @@
 import customtkinter as ctk
+from customtkinter import CTkButton
+
 from GUI.ConfirmationWindow import CTkConfirmationWindow
 
 class ButtonFrameList(ctk.CTkFrame):
@@ -91,20 +93,26 @@ class DetailsFrameTask(ctk.CTkFrame):
         self.combobox_var = ctk.StringVar(value="Low")
 
         self.textbox = ctk.CTkTextbox(self, height=60, width=300, corner_radius=6)
-        self.textbox.grid(row=0, column=0, padx=0, pady=5, sticky="nsew", rowspan=2)
+        self.textbox.grid(row=0, column=0, padx=10, pady=(5,5), sticky="nsew", rowspan=3)
         self.textbox.insert("0.0", "Some example text!\n" * 5)
         self.switch = ctk.CTkSwitch(self, text="Done", command=self.switch_command,
                                          variable=self.switch_var, onvalue="on", offvalue="off")
-        self.switch.grid(row=0, column=1, padx=25, pady=5, sticky="e")
+        self.switch.grid(row=0, column=1, padx=20, pady=(5,5), sticky="e")
         self.combobox = ctk.CTkComboBox(self, values=['Low', 'Medium', 'High'],
                                         command=self.combobox_command, variable=self.combobox_var)
-        self.combobox.grid(row=1, column=1, padx=25, pady=(5,10), sticky="ew")
+        self.combobox.grid(row=1, column=1, padx=20, pady=(5,5), sticky="e")
+        self.update_button = ctk.CTkButton(self, text="Update"
+                                             , command=self.update_task_command, corner_radius=6)
+        self.update_button.grid(row=2, column=1, padx=20, pady=(5,5), sticky="e")
 
     def switch_command(self):
         print("switch toggled, current value:", self.switch_var.get())
 
     def combobox_command(self, choice):
         print("combobox dropdown clicked:", choice)
+
+    def update_task_command(self):
+        pass
 
 
 class MainFrameForList(ctk.CTkFrame):
@@ -131,7 +139,7 @@ class MainFrameForTask(ctk.CTkFrame):
 
         self.title_label = ctk.CTkLabel(self, text=self.title, fg_color='gray30', corner_radius=6)
         self.title_label.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nsew")
-        self.radio_frame_task = ScrollableFrameTask(self,height=267)
+        self.radio_frame_task = ScrollableFrameTask(self,height=237)
         self.radio_frame_task.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
         self.task_details = DetailsFrameTask(self)
         self.task_details.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
@@ -143,7 +151,7 @@ class TODOapp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("my app")
+        self.title("TODO task manager")
         self.geometry("800x500")
         self.minsize(800, 500)
         self.maxsize(800, 500)
