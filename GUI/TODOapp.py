@@ -1,9 +1,11 @@
 import customtkinter as ctk
+from GUI.ConfirmationWindow import CTkConfirmationWindow
 
 class ButtonFrameList(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
         self.master = master
+        self.delete_list_confirmation = None
         self.grid_columnconfigure((0,1), weight=1)
         self.button_new_list = ctk.CTkButton(self, text="New List"
                                              , command=self.new_list_command, corner_radius=6)
@@ -12,10 +14,16 @@ class ButtonFrameList(ctk.CTkFrame):
                                              , command=self.delete_list_command, corner_radius=6)
         self.button_delete_list.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
 
-    def new_list_command(self):
-        pass
-    def delete_list_command(self):
-        pass
+    @staticmethod
+    def new_list_command():
+        dialog = ctk.CTkInputDialog(text="Put your new list name:", title="New List")
+        print("New List name:", dialog.get_input())
+
+    @staticmethod
+    def delete_list_command():
+        dialog = CTkConfirmationWindow(text="Are you sure you want to delete the list and all tasks?", title="Delete List confirmation")
+        print("Delete list confirmation:", dialog.get_input())
+
 
 
 class ButtonFrameTask(ctk.CTkFrame):
@@ -30,10 +38,16 @@ class ButtonFrameTask(ctk.CTkFrame):
                                              , command=self.delete_task_command, corner_radius=6)
         self.button_delete_task.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
 
-    def new_task_command(self):
-        pass
-    def delete_task_command(self):
-        pass
+    @staticmethod
+    def new_task_command():
+        dialog = ctk.CTkInputDialog(text="Put your new task name:", title="New Task")
+        print("New task name:", dialog.get_input())
+
+    @staticmethod
+    def delete_task_command():
+        dialog = CTkConfirmationWindow(text="Are you sure you want to delete the task?",
+                                       title="Delete Task confirmation")
+        print("Delete task confirmation:", dialog.get_input())
 
 
 class ScrollableFrameList(ctk.CTkScrollableFrame):
@@ -72,11 +86,25 @@ class ScrollableFrameTask(ctk.CTkScrollableFrame):
 class DetailsFrameTask(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
-        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure((0,1), weight=1)
+        self.switch_var = ctk.StringVar(value="on")
+        self.combobox_var = ctk.StringVar(value="Low")
 
-        self.textbox = ctk.CTkTextbox(self, height=60, corner_radius=6)
-        self.textbox.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
+        self.textbox = ctk.CTkTextbox(self, height=60, width=300, corner_radius=6)
+        self.textbox.grid(row=0, column=0, padx=0, pady=5, sticky="nsew", rowspan=2)
         self.textbox.insert("0.0", "Some example text!\n" * 5)
+        self.switch = ctk.CTkSwitch(self, text="Done", command=self.switch_command,
+                                         variable=self.switch_var, onvalue="on", offvalue="off")
+        self.switch.grid(row=0, column=1, padx=25, pady=5, sticky="e")
+        self.combobox = ctk.CTkComboBox(self, values=['Low', 'Medium', 'High'],
+                                        command=self.combobox_command, variable=self.combobox_var)
+        self.combobox.grid(row=1, column=1, padx=25, pady=(5,10), sticky="ew")
+
+    def switch_command(self):
+        print("switch toggled, current value:", self.switch_var.get())
+
+    def combobox_command(self, choice):
+        print("combobox dropdown clicked:", choice)
 
 
 class MainFrameForList(ctk.CTkFrame):
@@ -103,7 +131,7 @@ class MainFrameForTask(ctk.CTkFrame):
 
         self.title_label = ctk.CTkLabel(self, text=self.title, fg_color='gray30', corner_radius=6)
         self.title_label.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nsew")
-        self.radio_frame_task = ScrollableFrameTask(self,height=285)
+        self.radio_frame_task = ScrollableFrameTask(self,height=267)
         self.radio_frame_task.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
         self.task_details = DetailsFrameTask(self)
         self.task_details.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
@@ -121,13 +149,13 @@ class TODOapp(ctk.CTk):
         self.maxsize(800, 500)
         ctk.set_appearance_mode('dark')
         ctk.set_default_color_theme('dark-blue')
-        self.grid_columnconfigure((0, 1), weight=1)
+        self.grid_columnconfigure((0, 1, 2, 3), weight=1)
         self.grid_rowconfigure(0, weight=1)
 
         self.main_list_frame = MainFrameForList(self, title="Lists" )
         self.main_list_frame.grid(column=0, row=0, padx=(10,5), pady=(10, 10), sticky='nsew')
         self.main_task_frame = MainFrameForTask(self, title="Tasks")
-        self.main_task_frame.grid(column=1, row=0, padx=(5,10), pady=(10, 10), sticky='nsew')
+        self.main_task_frame.grid(column=1, row=0, padx=(5,10), pady=(10, 10), sticky='nsew',columnspan=3)
 
 
 
