@@ -3,12 +3,72 @@ from streamlit import connection
 from settings import DATABASE
 import psycopg2
 
-print(DATABASE['default'].get('ENGINE'))
-print(DATABASE['default'].get('NAME'))
-print(DATABASE['default'].get('USER'))
-print(DATABASE['default'].get('PASSWORD'))
-print(DATABASE['default'].get('HOST'))
-print(DATABASE['default'].get('PORT'))
+class ToDoDataBase:
+    def __init__(self, connection):
+        self.connection = connection
+
+    def add_list(self,name):
+        query = 'INSERT INTO list (name) VALUES (%s) RETURNING id;'
+        with self.connection.cursor() as cursor:
+            cursor.execute(query, (name))
+            list_id = cursor.fetchone()[0]
+            self.connection.commit()
+
+        return list_id
+
+    def get_list(self,list_id):
+        query = 'SELECT * FROM list WHERE id = %s'
+        with self.connection.cursor() as cursor:
+            cursor.execute(query, (list_id))
+            list = cursor.fetchone()
+            self.connection.commit()
+
+        return list
+
+    def get_lists(self):
+        query = 'SELECT * FROM list'
+        with self.connection.cursor() as cursor:
+            cursor.execute(query)
+            lists = cursor.fetchall()
+            self.connection.commit()
+
+        return lists
+
+    def update_list(self,id,name):
+        query = 'UPDATE list SET name = %s WHERE id = %s'
+        with self.connection.cursor() as cursor:
+            cursor.execute(query, (name,id))
+            self.connection.commit()
+            if cursor.rowcount == 1:
+                list_id = cursor.fetchone()[0]
+            else:
+                list_id = 0
+
+        return list_id
+
+    def delete_list(self,id):
+        query = 'DELETE FROM list WHERE id = %s'
+        with self.connection.cursor() as cursor:
+            cursor.execute(query, (id))
+            self.connection.commit()
+            if cursor.rowcount == 1:
+                list_id = cursor.fetchone()[0]
+            else:
+                list_id = 0
+
+        return list_id
+
+    def insert_list(self, name):
+        query = 'INSERT INTO list (name) VALUES (%s)'
+        with self.connection.cursor() as cursor:
+            cursor.execute(query, (name))
+            self.connection.commit()
+            if cursor.rowcount == 1:
+                list_id = cursor.fetchone()[0]
+            else:
+                list_id = 0
+
+        return list_id
 
 
 try:
@@ -18,7 +78,9 @@ try:
                                   password=DATABASE['default'].get('PASSWORD'),
                                   port=DATABASE['default'].get('PORT')
                                   )
-    print('db connected')
+    todo_db = ToDoDataBase(connection)
+    print(todo_db.get_list('2'))
+    print(todo_db.get_lists())
 except (Exception, psycopg2.DatabaseError) as error:
     print('error in db connection')
     print(error)
