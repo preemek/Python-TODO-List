@@ -11,7 +11,10 @@ class ToDoDataBase:
         query = 'INSERT INTO list (name) VALUES (%s) RETURNING id;'
         with self.connection.cursor() as cursor:
             cursor.execute(query, (name))
-            list_id = cursor.fetchone()[0]
+            if cursor.rowcount ==1:
+                list_id = cursor.fetchone()[0]
+            else:
+                list_id = 0
             self.connection.commit()
 
         return list_id
@@ -50,18 +53,6 @@ class ToDoDataBase:
         query = 'DELETE FROM list WHERE id = %s'
         with self.connection.cursor() as cursor:
             cursor.execute(query, (id))
-            self.connection.commit()
-            if cursor.rowcount == 1:
-                list_id = cursor.fetchone()[0]
-            else:
-                list_id = 0
-
-        return list_id
-
-    def insert_list(self, name):
-        query = 'INSERT INTO list (name) VALUES (%s)'
-        with self.connection.cursor() as cursor:
-            cursor.execute(query, (name))
             self.connection.commit()
             if cursor.rowcount == 1:
                 list_id = cursor.fetchone()[0]
