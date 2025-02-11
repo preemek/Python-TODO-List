@@ -39,6 +39,17 @@ class TODO_db:
             session.delete(list_to_delete)
             session.commit()
 
+    def get_all_tasks(self, list_id):
+        with Session(self.engine) as session:
+            tasks = session.query(self.Task).filter(self.Task.id == list_id).all()
+        return tasks
+
+    def add_new_task(self, list_id, task_name):
+        with Session(self.engine) as session:
+            new_task = self.Task(name = task_name, list_id = list_id)
+            session.add(new_task)
+            session.commit()
+
 
 
 

@@ -43,9 +43,11 @@ class ButtonFrameList(ctk.CTkFrame):
 
 
 class ButtonFrameTask(ctk.CTkFrame):
-    def __init__(self, master):
+    def __init__(self, master, radio_frame_list, radio_frame_task):
         super().__init__(master)
         self.master = master
+        self.radio_frame_list = radio_frame_list
+        self.radio_frame_task = radio_frame_task
         self.grid_columnconfigure((0,1), weight=1)
         self.button_new_task = ctk.CTkButton(self, text="New Task"
                                              , command=self.new_task_command, corner_radius=6)
@@ -54,10 +56,12 @@ class ButtonFrameTask(ctk.CTkFrame):
                                              , command=self.delete_task_command, corner_radius=6)
         self.button_delete_task.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
 
-    @staticmethod
-    def new_task_command():
+
+    def new_task_command(self):
         dialog = ctk.CTkInputDialog(text="Put your new task name:", title="New Task")
-        print("New task name:", dialog.get_input())
+        new_task_name = dialog.get_input()
+        list_id = self.radio_frame_list.variable.get()
+        todo_db.add_new_task(list_id, new_task_name)
 
     @staticmethod
     def delete_task_command():
@@ -84,7 +88,6 @@ class ScrollableFrameList(ctk.CTkScrollableFrame):
         for l in list_rows:
             self.lists.append((l.id,l.name))
 
-
         for i, l in enumerate(self.lists):
             radiobutton = ctk.CTkRadioButton(self, text=l[1], value=l[0], variable=self.variable)
             radiobutton.grid(row=i, column=0, padx=10, pady=(10, 0), sticky="w")
@@ -93,12 +96,16 @@ class ScrollableFrameList(ctk.CTkScrollableFrame):
 
 
 class ScrollableFrameTask(ctk.CTkScrollableFrame):
-    def __init__(self, master, **kwargs):
+    def __init__(self, master, radio_frame_list, **kwargs):
         super().__init__(master, **kwargs)
         self.radiobuttons = []
         self.variable = ctk.StringVar(value="")
         self.tasks = ['Task 1', 'Task 2', 'Task 3']
         self.grid_columnconfigure((0, 1, 2, 3), weight=1)
+
+
+
+    def add_radiobuttons(self):
 
         for i, t in enumerate(self.tasks):
             radiobutton = ctk.CTkRadioButton(self, text=t, value=t, variable=self.variable)
@@ -159,19 +166,22 @@ class MainFrameForList(ctk.CTkFrame):
 
 
 class MainFrameForTask(ctk.CTkFrame):
-    def __init__(self, master, title):
+    def __init__(self, master, title, main_list_frame):
         super().__init__(master)
         self.master = master
         self.title = title
+        self.main_list_frame = main_list_frame
         self.grid_columnconfigure(0, weight=1)
 
         self.title_label = ctk.CTkLabel(self, text=self.title, fg_color='gray30', corner_radius=6)
         self.title_label.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nsew")
-        self.radio_frame_task = ScrollableFrameTask(self,height=237)
+        self.radio_frame_task = ScrollableFrameTask(self,height=237
+                                                    , radio_frame_list = self.main_list_frame.radio_frame_list)
         self.radio_frame_task.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
         self.task_details = DetailsFrameTask(self)
         self.task_details.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
-        self.buttons_frame_task = ButtonFrameTask(self)
+        self.buttons_frame_task = ButtonFrameTask(self, self.main_list_frame.radio_frame_list
+                                                  , self.radio_frame_task)
         self.buttons_frame_task.grid(row=3, column=0, padx=5, pady=5, sticky="nsew")
 
 
@@ -190,7 +200,7 @@ class TODOapp(ctk.CTk):
 
         self.main_list_frame = MainFrameForList(self, title="Lists" )
         self.main_list_frame.grid(column=0, row=0, padx=(10,5), pady=(10, 10), sticky='nsew')
-        self.main_task_frame = MainFrameForTask(self, title="Tasks")
+        self.main_task_frame = MainFrameForTask(self, title="Tasks", main_list_frame = self.main_list_frame)
         self.main_task_frame.grid(column=1, row=0, padx=(5,10), pady=(10, 10), sticky='nsew',columnspan=3)
 
 
