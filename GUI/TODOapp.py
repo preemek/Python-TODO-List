@@ -74,8 +74,12 @@ class ScrollableFrameList(ctk.CTkScrollableFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
         self.radiobuttons = []
+        self.radio_frame_task = None
         self.variable = ctk.StringVar(value="")
         self.lists = []
+
+    def set_radio_frame_task(self, radio_frame_task):
+        self.radio_frame_task = radio_frame_task
 
     def remove_radiobuttons(self):
         self.lists = []
@@ -89,34 +93,66 @@ class ScrollableFrameList(ctk.CTkScrollableFrame):
             self.lists.append((l.id,l.name))
 
         for i, l in enumerate(self.lists):
-            radiobutton = ctk.CTkRadioButton(self, text=l[1], value=l[0], variable=self.variable)
+            radiobutton = ctk.CTkRadioButton(self, text=l[1], value=l[0], command=self.radiobutton_event
+                                             ,variable=self.variable)
             radiobutton.grid(row=i, column=0, padx=10, pady=(10, 0), sticky="w")
             self.radiobuttons.append(radiobutton)
+
+    def radiobutton_event(self):
+        print('list id = ', self.variable.get())
+        self.radio_frame_task.remove_radiobuttons()
+        self.radio_frame_task.add_radiobuttons()
 
 
 
 class ScrollableFrameTask(ctk.CTkScrollableFrame):
     def __init__(self, master, radio_frame_list, **kwargs):
         super().__init__(master, **kwargs)
+        self.radio_frame_list = radio_frame_list
         self.radiobuttons = []
+        self.date_labels = []
+        self.status_labels = []
+        self.priority_labels = []
         self.variable = ctk.StringVar(value="")
-        self.tasks = ['Task 1', 'Task 2', 'Task 3']
+        self.tasks = []
         self.grid_columnconfigure((0, 1, 2, 3), weight=1)
 
+    def remove_radiobuttons(self):
+        for r in self.radiobuttons:
+            r.destroy()
+        for d in self.date_labels:
+            d.destroy()
+        for s in self.status_labels:
+            s.destroy()
+        for p in self.priority_labels:
+            p.destroy()
 
+        self.tasks = []
+        self.radiobuttons = []
+        self.date_labels = []
+        self.status_labels = []
+        self.priority_labels = []
 
     def add_radiobuttons(self):
+        list_id = self.radio_frame_list.variable.get()
+        task_rows = todo_db.get_all_tasks(list_id)
+
+        for t in task_rows:
+            self.tasks.append((t.id,t.list_id,t.name,t.deadline,t.priority,t.status))
 
         for i, t in enumerate(self.tasks):
-            radiobutton = ctk.CTkRadioButton(self, text=t, value=t, variable=self.variable)
+            radiobutton = ctk.CTkRadioButton(self, text=t[2], value=t[0], variable=self.variable)
             radiobutton.grid(row=i, column=0, padx=5, pady=(5, 0), sticky="w")
-            label_date = ctk.CTkLabel(self, text="2025-02-06", fg_color="transparent")
+            label_date = ctk.CTkLabel(self, text=t[3], fg_color="transparent")
             label_date.grid(row=i, column=1, padx=5, pady=5, sticky="ew")
-            label_status = ctk.CTkLabel(self, text="In progress", fg_color="transparent")
+            label_status = ctk.CTkLabel(self, text=t[5], fg_color="transparent")
             label_status.grid(row=i, column=2, padx=5, pady=5, sticky="ew")
-            label_status = ctk.CTkLabel(self, text="High", fg_color="transparent")
-            label_status.grid(row=i, column=3, padx=5, pady=5, sticky="ew")
+            label_priority = ctk.CTkLabel(self, text=t[4], fg_color="transparent")
+            label_priority.grid(row=i, column=3, padx=5, pady=5, sticky="ew")
             self.radiobuttons.append(radiobutton)
+            self.date_labels.append(label_date)
+            self.status_labels.append(label_status)
+            self.priority_labels.append(label_priority)
 
 
 class DetailsFrameTask(ctk.CTkFrame):
@@ -154,6 +190,7 @@ class MainFrameForList(ctk.CTkFrame):
         super().__init__(master)
         self.master = master
         self.title = title
+        self.main_task_frame = None
         self.grid_columnconfigure(0, weight=1)
 
         self.title_label = ctk.CTkLabel(self, text=self.title, fg_color='gray30', corner_radius=6)
@@ -163,6 +200,10 @@ class MainFrameForList(ctk.CTkFrame):
         self.radio_frame_list.add_radiobuttons()
         self.buttons_frame_list = ButtonFrameList(self, self.radio_frame_list)
         self.buttons_frame_list.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
+
+    def set_main_task_frame(self, main_task_frame):
+        self.main_task_frame = main_task_frame
+        self.radio_frame_list.set_radio_frame_task(self.main_task_frame.radio_frame_task)
 
 
 class MainFrameForTask(ctk.CTkFrame):
@@ -198,9 +239,10 @@ class TODOapp(ctk.CTk):
         self.grid_columnconfigure((0, 1, 2, 3), weight=1)
         self.grid_rowconfigure(0, weight=1)
 
-        self.main_list_frame = MainFrameForList(self, title="Lists" )
+        self.main_list_frame = MainFrameForList(self, title="Lists")
         self.main_list_frame.grid(column=0, row=0, padx=(10,5), pady=(10, 10), sticky='nsew')
         self.main_task_frame = MainFrameForTask(self, title="Tasks", main_list_frame = self.main_list_frame)
+        self.main_list_frame.set_main_task_frame(self.main_task_frame)
         self.main_task_frame.grid(column=1, row=0, padx=(5,10), pady=(10, 10), sticky='nsew',columnspan=3)
 
 
