@@ -2,8 +2,10 @@ import customtkinter as ctk
 from customtkinter import CTkButton
 from GUI.ConfirmationWindow import CTkConfirmationWindow
 
-from DataBase.sqlalchemy_todo_db import engine,List
+from DataBase.sqlalchemy_todo_db import TODO_db, connect_url
 from sqlalchemy.orm import Session
+
+todo_db = TODO_db(connect_url)
 
 class ButtonFrameList(ctk.CTkFrame):
     def __init__(self, master, radio_frame_list):
@@ -22,20 +24,21 @@ class ButtonFrameList(ctk.CTkFrame):
 
     def new_list_command(self):
         dialog = ctk.CTkInputDialog(text="Put your new list name:", title="New List")
-        with Session(engine) as session:
-            new_list = List(name = dialog.get_input())
-            session.add(new_list)
-            session.commit()
+        new_list_name = dialog.get_input()
+        todo_db.add_new_list(new_list_name)
+        self.radio_frame_list.remove_radiobuttons()
         self.radio_frame_list.add_radiobuttons()
 
 
-
-
-
-    @staticmethod
-    def delete_list_command():
+    def delete_list_command(self):
         dialog = CTkConfirmationWindow(text="Are you sure you want to delete the list and all tasks?", title="Delete List confirmation")
-        print("Delete list confirmation:", dialog.get_input())
+        conf = dialog.get_input()
+        list_id_to_delete = self.radio_frame_list.variable.get()
+        if conf == 'Yes':
+            todo_db.delete_list(list_id_to_delete)
+        self.radio_frame_list.remove_radiobuttons()
+        self.radio_frame_list.add_radiobuttons()
+
 
 
 
@@ -70,22 +73,23 @@ class ScrollableFrameList(ctk.CTkScrollableFrame):
         self.variable = ctk.StringVar(value="")
         self.lists = []
 
-    def add_radiobuttons(self):
+    def remove_radiobuttons(self):
         self.lists = []
         for r in self.radiobuttons:
             r.destroy()
-
         self.radiobuttons = []
 
-        with Session(engine) as session:
-            list = session.query(List).all()
-            for l in list:
-                self.lists.append(l.name)
+    def add_radiobuttons(self):
+        list_rows = todo_db.get_all_lists()
+        for l in list_rows:
+            self.lists.append((l.id,l.name))
+
 
         for i, l in enumerate(self.lists):
-            radiobutton = ctk.CTkRadioButton(self, text=l, value=l, variable=self.variable)
+            radiobutton = ctk.CTkRadioButton(self, text=l[1], value=l[0], variable=self.variable)
             radiobutton.grid(row=i, column=0, padx=10, pady=(10, 0), sticky="w")
             self.radiobuttons.append(radiobutton)
+
 
 
 class ScrollableFrameTask(ctk.CTkScrollableFrame):

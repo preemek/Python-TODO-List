@@ -1,8 +1,8 @@
 
 from settings import DATABASE
-from sqlalchemy import URL
+from sqlalchemy import URL, create_engine
 from sqlalchemy.ext.automap import automap_base
-from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
 
 connect_url = URL.create(
     'postgresql+psycopg2',
@@ -12,12 +12,32 @@ connect_url = URL.create(
     port=DATABASE['default'].get('PORT'),
     database=DATABASE['default'].get('NAME'))
 
-engine = create_engine(connect_url)
-Base = automap_base()
-Base.prepare(engine)
-List = Base.classes.list
 
 
+class TODO_db:
+    def __init__(self, connect_url):
+        self.engine = create_engine(connect_url)
+        self.Base = automap_base()
+        self.Base.prepare(self.engine)
+        self.List = self.Base.classes.list
+        self.Task = self.Base.classes.task
+
+    def get_all_lists(self):
+        with Session(self.engine) as session:
+            list = session.query(self.List).all()
+        return list
+
+    def add_new_list(self, list_name):
+        with Session(self.engine) as session:
+            new_list = self.List(name = list_name)
+            session.add(new_list)
+            session.commit()
+
+    def delete_list(self, list_id):
+        with Session(self.engine) as session:
+            list_to_delete = session.query(self.List).filter(self.List.id == list_id).one()
+            session.delete(list_to_delete)
+            session.commit()
 
 
 
