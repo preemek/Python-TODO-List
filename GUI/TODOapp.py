@@ -1,13 +1,16 @@
 import customtkinter as ctk
 from customtkinter import CTkButton
-
 from GUI.ConfirmationWindow import CTkConfirmationWindow
 
+from DataBase.sqlalchemy_todo_db import engine,List
+from sqlalchemy.orm import Session
+
 class ButtonFrameList(ctk.CTkFrame):
-    def __init__(self, master):
+    def __init__(self, master, radio_frame_list):
         super().__init__(master)
         self.master = master
         self.delete_list_confirmation = None
+        self.radio_frame_list = radio_frame_list
         self.grid_columnconfigure((0,1), weight=1)
         self.button_new_list = ctk.CTkButton(self, text="New List"
                                              , command=self.new_list_command, corner_radius=6)
@@ -16,10 +19,18 @@ class ButtonFrameList(ctk.CTkFrame):
                                              , command=self.delete_list_command, corner_radius=6)
         self.button_delete_list.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
 
-    @staticmethod
-    def new_list_command():
+
+    def new_list_command(self):
         dialog = ctk.CTkInputDialog(text="Put your new list name:", title="New List")
-        print("New List name:", dialog.get_input())
+        with Session(engine) as session:
+            new_list = List(name = dialog.get_input())
+            session.add(new_list)
+            session.commit()
+        self.radio_frame_list.add_radiobuttons()
+
+
+
+
 
     @staticmethod
     def delete_list_command():
@@ -57,7 +68,19 @@ class ScrollableFrameList(ctk.CTkScrollableFrame):
         super().__init__(master, **kwargs)
         self.radiobuttons = []
         self.variable = ctk.StringVar(value="")
-        self.lists = ['Lista 1', 'Lista 2', 'Lista 3']
+        self.lists = []
+
+    def add_radiobuttons(self):
+        self.lists = []
+        for r in self.radiobuttons:
+            r.destroy()
+
+        self.radiobuttons = []
+
+        with Session(engine) as session:
+            list = session.query(List).all()
+            for l in list:
+                self.lists.append(l.name)
 
         for i, l in enumerate(self.lists):
             radiobutton = ctk.CTkRadioButton(self, text=l, value=l, variable=self.variable)
@@ -126,7 +149,8 @@ class MainFrameForList(ctk.CTkFrame):
         self.title_label.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nsew")
         self.radio_frame_list = ScrollableFrameList(self, height=355)
         self.radio_frame_list.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
-        self.buttons_frame_list = ButtonFrameList(self)
+        self.radio_frame_list.add_radiobuttons()
+        self.buttons_frame_list = ButtonFrameList(self, self.radio_frame_list)
         self.buttons_frame_list.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
 
 

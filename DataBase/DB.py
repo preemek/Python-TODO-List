@@ -3,6 +3,9 @@ from streamlit import connection
 from settings import DATABASE
 import psycopg2
 
+DATABASE_URI = "postgresql+psycopg2//"
+
+
 class ToDoDataBase:
     def __init__(self, connection):
         self.connection = connection
