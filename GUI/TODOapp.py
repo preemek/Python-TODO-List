@@ -156,11 +156,11 @@ class DetailsFrameTask(ctk.CTkFrame):
         self.task_description = ctk.CTkTextbox(self, height=60, corner_radius=6)
         self.task_description.grid(row=0, column=1, padx=10, pady=(5, 5), sticky="nsew", rowspan=2)
 
-        self.task_status = ctk.CTkSwitch(self, text="Done", command=self.switch_command,
+        self.task_status = ctk.CTkSwitch(self, text="Done",
                                          variable=self.switch_var, onvalue="1", offvalue="0")
         self.task_status.grid(row=0, column=0, padx=20, pady=(5, 5), sticky="ew")
         self.task_priority = ctk.CTkComboBox(self, values=['Low', 'Medium', 'High'],
-                                             command=self.combobox_command, variable=self.combobox_var)
+                                             variable=self.combobox_var)
         self.task_priority.grid(row=1, column=0, padx=20, pady=(5, 5), sticky="ew")
         self.task_deadline = ctk.CTkEntry(self, placeholder_text='YYYY-mm-dd')
         self.task_deadline.grid(row=2, column=0, padx=20, pady=(5, 5), sticky="ew")
