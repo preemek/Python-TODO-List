@@ -1,9 +1,6 @@
 import customtkinter as ctk
-from customtkinter import CTkButton
 from GUI.ConfirmationWindow import CTkConfirmationWindow
-
 from DataBase.sqlalchemy_todo_db import TODO_db, connect_url
-from sqlalchemy.orm import Session
 
 todo_db = TODO_db(connect_url)
 
@@ -13,6 +10,7 @@ class ButtonFrameList(ctk.CTkFrame):
         self.master = master
         self.delete_list_confirmation = None
         self.radio_frame_list = radio_frame_list
+        self.radio_frame_task = None
         self.grid_columnconfigure((0,1), weight=1)
         self.button_new_list = ctk.CTkButton(self, text="New List"
                                              , command=self.new_list_command, corner_radius=6)
@@ -21,14 +19,17 @@ class ButtonFrameList(ctk.CTkFrame):
                                              , command=self.delete_list_command, corner_radius=6)
         self.button_delete_list.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
 
+    def set_radio_frame_task(self, radio_frame_task):
+        self.radio_frame_task = radio_frame_task
 
     def new_list_command(self):
         dialog = ctk.CTkInputDialog(text="Put your new list name:", title="New List")
         new_list_name = dialog.get_input()
-        todo_db.add_new_list(new_list_name)
-        self.radio_frame_list.remove_radiobuttons()
-        self.radio_frame_list.add_radiobuttons()
-
+        if new_list_name:
+            todo_db.add_new_list(new_list_name)
+            self.radio_frame_list.remove_radiobuttons()
+            self.radio_frame_list.add_radiobuttons()
+            self.radio_frame_task.remove_radiobuttons()
 
     def delete_list_command(self):
         dialog = CTkConfirmationWindow(text="Are you sure you want to delete the list and all tasks?", title="Delete List confirmation")
@@ -36,10 +37,9 @@ class ButtonFrameList(ctk.CTkFrame):
         list_id_to_delete = self.radio_frame_list.variable.get()
         if conf == 'Yes':
             todo_db.delete_list(list_id_to_delete)
-        self.radio_frame_list.remove_radiobuttons()
-        self.radio_frame_list.add_radiobuttons()
-
-
+            self.radio_frame_list.remove_radiobuttons()
+            self.radio_frame_list.add_radiobuttons()
+            self.radio_frame_task.remove_radiobuttons()
 
 
 class ButtonFrameTask(ctk.CTkFrame):
@@ -60,14 +60,20 @@ class ButtonFrameTask(ctk.CTkFrame):
     def new_task_command(self):
         dialog = ctk.CTkInputDialog(text="Put your new task name:", title="New Task")
         new_task_name = dialog.get_input()
-        list_id = self.radio_frame_list.variable.get()
-        todo_db.add_new_task(list_id, new_task_name)
+        if new_task_name:
+            list_id = self.radio_frame_list.variable.get()
+            todo_db.add_new_task(list_id, new_task_name)
+            self.radio_frame_task.remove_radiobuttons()
+            self.radio_frame_task.add_radiobuttons()
 
-    @staticmethod
-    def delete_task_command():
+    def delete_task_command(self):
         dialog = CTkConfirmationWindow(text="Are you sure you want to delete the task?",
                                        title="Delete Task confirmation")
-        print("Delete task confirmation:", dialog.get_input())
+        task_to_delete = self.radio_frame_task.variable.get()
+        if dialog.get_input() == "Yes":
+            todo_db.delete_task(task_to_delete)
+            self.radio_frame_task.remove_radiobuttons()
+            self.radio_frame_task.add_radiobuttons()
 
 
 class ScrollableFrameList(ctk.CTkScrollableFrame):
@@ -102,7 +108,6 @@ class ScrollableFrameList(ctk.CTkScrollableFrame):
         print('list id = ', self.variable.get())
         self.radio_frame_task.remove_radiobuttons()
         self.radio_frame_task.add_radiobuttons()
-
 
 
 class ScrollableFrameTask(ctk.CTkScrollableFrame):
@@ -204,6 +209,7 @@ class MainFrameForList(ctk.CTkFrame):
     def set_main_task_frame(self, main_task_frame):
         self.main_task_frame = main_task_frame
         self.radio_frame_list.set_radio_frame_task(self.main_task_frame.radio_frame_task)
+        self.buttons_frame_list.set_radio_frame_task(self.main_task_frame.radio_frame_task)
 
 
 class MainFrameForTask(ctk.CTkFrame):

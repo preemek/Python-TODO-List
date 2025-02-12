@@ -50,6 +50,12 @@ class TODO_db:
             session.add(new_task)
             session.commit()
 
+    def delete_task(self, task_id):
+        with Session(self.engine) as session:
+            task_to_delete = session.query(self.Task).filter(self.Task.id == task_id).one()
+            session.delete(task_to_delete)
+            session.commit()
+
 
 
 
