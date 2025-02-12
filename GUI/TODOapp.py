@@ -105,7 +105,6 @@ class ScrollableFrameList(ctk.CTkScrollableFrame):
             self.radiobuttons.append(radiobutton)
 
     def radiobutton_event(self):
-        print('list id = ', self.variable.get())
         self.radio_frame_task.remove_radiobuttons()
         self.radio_frame_task.add_radiobuttons()
 
@@ -114,80 +113,80 @@ class ScrollableFrameTask(ctk.CTkScrollableFrame):
     def __init__(self, master, radio_frame_list, **kwargs):
         super().__init__(master, **kwargs)
         self.radio_frame_list = radio_frame_list
+        self.task_details = None
         self.radiobuttons = []
-        self.date_labels = []
-        self.status_labels = []
-        self.priority_labels = []
         self.variable = ctk.StringVar(value="")
         self.tasks = []
         self.grid_columnconfigure((0, 1, 2, 3), weight=1)
 
+    def set_task_details(self, task_details):
+        self.task_details = task_details
+
     def remove_radiobuttons(self):
         for r in self.radiobuttons:
             r.destroy()
-        for d in self.date_labels:
-            d.destroy()
-        for s in self.status_labels:
-            s.destroy()
-        for p in self.priority_labels:
-            p.destroy()
-
         self.tasks = []
         self.radiobuttons = []
-        self.date_labels = []
-        self.status_labels = []
-        self.priority_labels = []
 
     def add_radiobuttons(self):
         list_id = self.radio_frame_list.variable.get()
         task_rows = todo_db.get_all_tasks(list_id)
 
         for t in task_rows:
-            self.tasks.append((t.id,t.list_id,t.name,t.deadline,t.priority,t.status))
+            self.tasks.append((t.id,t.list_id,t.name))
 
         for i, t in enumerate(self.tasks):
-            radiobutton = ctk.CTkRadioButton(self, text=t[2], value=t[0], variable=self.variable)
+            radiobutton = ctk.CTkRadioButton(self, text=t[2], value=t[0], command=self.radiobutton_event
+                                             , variable=self.variable)
             radiobutton.grid(row=i, column=0, padx=5, pady=(5, 0), sticky="w")
-            label_date = ctk.CTkLabel(self, text=t[3], fg_color="transparent")
-            label_date.grid(row=i, column=1, padx=5, pady=5, sticky="ew")
-            label_status = ctk.CTkLabel(self, text=t[5], fg_color="transparent")
-            label_status.grid(row=i, column=2, padx=5, pady=5, sticky="ew")
-            label_priority = ctk.CTkLabel(self, text=t[4], fg_color="transparent")
-            label_priority.grid(row=i, column=3, padx=5, pady=5, sticky="ew")
             self.radiobuttons.append(radiobutton)
-            self.date_labels.append(label_date)
-            self.status_labels.append(label_status)
-            self.priority_labels.append(label_priority)
+
+    def radiobutton_event(self):
+        pass
 
 
 class DetailsFrameTask(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
+        self.radio_frame_task = None
         self.grid_columnconfigure((0,1), weight=1)
         self.switch_var = ctk.StringVar(value="on")
         self.combobox_var = ctk.StringVar(value="Low")
 
-        self.textbox = ctk.CTkTextbox(self, height=60, width=300, corner_radius=6)
-        self.textbox.grid(row=0, column=0, padx=10, pady=(5,5), sticky="nsew", rowspan=3)
-        self.textbox.insert("0.0", "Some example text!\n" * 5)
-        self.switch = ctk.CTkSwitch(self, text="Done", command=self.switch_command,
-                                         variable=self.switch_var, onvalue="on", offvalue="off")
-        self.switch.grid(row=0, column=1, padx=20, pady=(5,5), sticky="e")
-        self.combobox = ctk.CTkComboBox(self, values=['Low', 'Medium', 'High'],
-                                        command=self.combobox_command, variable=self.combobox_var)
-        self.combobox.grid(row=1, column=1, padx=20, pady=(5,5), sticky="e")
-        self.update_button = ctk.CTkButton(self, text="Update"
+        self.task_description = ctk.CTkTextbox(self, height=60, corner_radius=6)
+        self.task_description.grid(row=0, column=1, padx=10, pady=(5, 5), sticky="nsew", rowspan=2)
+
+        self.task_status = ctk.CTkSwitch(self, text="Done", command=self.switch_command,
+                                         variable=self.switch_var, onvalue="1", offvalue="0")
+        self.task_status.grid(row=0, column=0, padx=20, pady=(5, 5), sticky="ew")
+        self.task_priority = ctk.CTkComboBox(self, values=['Low', 'Medium', 'High'],
+                                             command=self.combobox_command, variable=self.combobox_var)
+        self.task_priority.grid(row=1, column=0, padx=20, pady=(5, 5), sticky="ew")
+        self.task_deadline = ctk.CTkEntry(self, placeholder_text='YYYY-mm-dd')
+        self.task_deadline.grid(row=2, column=0, padx=20, pady=(5, 5), sticky="ew")
+        self.update_button = ctk.CTkButton(self, text="Update Task"
                                              , command=self.update_task_command, corner_radius=6)
-        self.update_button.grid(row=2, column=1, padx=20, pady=(5,5), sticky="e")
+        self.update_button.grid(row=2, column=1, padx=10, pady=(5,5), sticky="ew")
 
-    def switch_command(self):
-        print("switch toggled, current value:", self.switch_var.get())
+    def set_radio_frame_task(self, radio_frame_task):
+        self.radio_frame_task = radio_frame_task
 
-    def combobox_command(self, choice):
-        print("combobox dropdown clicked:", choice)
+    def clear_task_details(self):
+        pass
+
+    def fill_task_details(self):
+        pass
 
     def update_task_command(self):
-        pass
+        task_id = self.radio_frame_task.variable.get()
+        task_description = self.task_description.get("0.0", "end")
+        task_status = self.switch_var.get()
+        task_priority = self.task_priority.get()
+        task_deadline = self.task_deadline.get()
+        if task_id:
+            todo_db.update_task(task_id, task_description, task_status, task_priority, task_deadline)
+
+
 
 
 class MainFrameForList(ctk.CTkFrame):
@@ -230,6 +229,8 @@ class MainFrameForTask(ctk.CTkFrame):
         self.buttons_frame_task = ButtonFrameTask(self, self.main_list_frame.radio_frame_list
                                                   , self.radio_frame_task)
         self.buttons_frame_task.grid(row=3, column=0, padx=5, pady=5, sticky="nsew")
+        self.radio_frame_task.set_task_details(self.task_details)
+        self.task_details.set_radio_frame_task(self.radio_frame_task)
 
 
 class TODOapp(ctk.CTk):

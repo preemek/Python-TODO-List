@@ -56,6 +56,16 @@ class TODO_db:
             session.delete(task_to_delete)
             session.commit()
 
+    def update_task(self, task_id, task_description, task_status, task_priority, task_deadline):
+        with Session(self.engine) as session:
+            task_to_update = session.query(self.Task).filter(self.Task.id == task_id).one()
+            task_to_update.name = task_to_update.name
+            task_to_update.description = task_description
+            task_to_update.status = task_status
+            task_to_update.priority = task_priority
+            task_to_update.deadline = task_deadline
+            session.commit()
+
 
 
 
