@@ -4,7 +4,6 @@ from DataBase.sqlalchemy_todo_db import TODO_db, connect_url
 
 todo_db = TODO_db(connect_url)
 
-
 class ButtonFrameList(ctk.CTkFrame):
     def __init__(self, master, radio_frame_list):
         super().__init__(master)
