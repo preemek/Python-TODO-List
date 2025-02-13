@@ -44,6 +44,11 @@ class TODO_db:
             tasks = session.query(self.Task).filter(self.Task.list_id == list_id).all()
         return tasks
 
+    def get_task(self, task_id):
+        with Session(self.engine) as session:
+            task = session.query(self.Task).filter(self.Task.id == task_id).one()
+            return task
+
     def add_new_task(self, list_id, task_name):
         with Session(self.engine) as session:
             new_task = self.Task(name = task_name, list_id = list_id)

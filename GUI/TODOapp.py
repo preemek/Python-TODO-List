@@ -1,4 +1,6 @@
 import customtkinter as ctk
+from tornado.process import task_id
+
 from GUI.ConfirmationWindow import CTkConfirmationWindow
 from DataBase.sqlalchemy_todo_db import TODO_db, connect_url
 
@@ -142,7 +144,8 @@ class ScrollableFrameTask(ctk.CTkScrollableFrame):
             self.radiobuttons.append(radiobutton)
 
     def radiobutton_event(self):
-        pass
+        self.task_details.clear_task_details()
+        self.task_details.fill_task_details()
 
 
 class DetailsFrameTask(ctk.CTkFrame):
@@ -150,8 +153,8 @@ class DetailsFrameTask(ctk.CTkFrame):
         super().__init__(master, **kwargs)
         self.radio_frame_task = None
         self.grid_columnconfigure((0,1), weight=1)
-        self.switch_var = ctk.StringVar(value="on")
-        self.combobox_var = ctk.StringVar(value="Low")
+        self.switch_var = ctk.StringVar(value="0")
+        self.combobox_var = ctk.StringVar(value="")
 
         self.task_description = ctk.CTkTextbox(self, height=60, corner_radius=6)
         self.task_description.grid(row=0, column=1, padx=10, pady=(5, 5), sticky="nsew", rowspan=2)
@@ -159,7 +162,7 @@ class DetailsFrameTask(ctk.CTkFrame):
         self.task_status = ctk.CTkSwitch(self, text="Done",
                                          variable=self.switch_var, onvalue="1", offvalue="0")
         self.task_status.grid(row=0, column=0, padx=20, pady=(5, 5), sticky="ew")
-        self.task_priority = ctk.CTkComboBox(self, values=['Low', 'Medium', 'High'],
+        self.task_priority = ctk.CTkComboBox(self, values=['','Low', 'Medium', 'High'],
                                              variable=self.combobox_var)
         self.task_priority.grid(row=1, column=0, padx=20, pady=(5, 5), sticky="ew")
         self.task_deadline = ctk.CTkEntry(self, placeholder_text='YYYY-mm-dd')
@@ -172,10 +175,24 @@ class DetailsFrameTask(ctk.CTkFrame):
         self.radio_frame_task = radio_frame_task
 
     def clear_task_details(self):
-        pass
+        self.task_description.delete(0.0, 'end')
+        self.task_status.deselect()
+        self.task_priority.set('')
+        self.task_deadline.delete(0, 'end')
+        self.task_deadline.insert(0, 'YYYY-mm-dd')
 
     def fill_task_details(self):
-        pass
+        task_id = self.radio_frame_task.variable.get()
+        task = todo_db.get_task(task_id)
+        if task.description:
+            self.task_description.insert("0.0", task.description)
+        if task.status == '1':
+            self.task_status.select()
+        if task.priority:
+            self.task_priority.set(task.priority)
+        if task.deadline:
+            self.task_deadline.delete(0, 'end')
+            self.task_deadline.insert(0, task.deadline)
 
     def update_task_command(self):
         task_id = self.radio_frame_task.variable.get()
@@ -185,9 +202,6 @@ class DetailsFrameTask(ctk.CTkFrame):
         task_deadline = self.task_deadline.get()
         if task_id:
             todo_db.update_task(task_id, task_description, task_status, task_priority, task_deadline)
-
-
-
 
 class MainFrameForList(ctk.CTkFrame):
     def __init__(self, master, title):
