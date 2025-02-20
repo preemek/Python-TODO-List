@@ -1,5 +1,6 @@
+from datetime import datetime
 import customtkinter as ctk
-from tornado.process import task_id
+
 
 from GUI.ConfirmationWindow import CTkConfirmationWindow
 from DataBase.sqlalchemy_todo_db import TODO_db, connect_url
@@ -83,11 +84,15 @@ class ScrollableFrameList(ctk.CTkScrollableFrame):
         super().__init__(master, **kwargs)
         self.radiobuttons = []
         self.radio_frame_task = None
+        self.task_details = None
         self.variable = ctk.StringVar(value="")
         self.lists = []
 
     def set_radio_frame_task(self, radio_frame_task):
         self.radio_frame_task = radio_frame_task
+
+    def set_task_details(self, task_details):
+        self.task_details = task_details
 
     def remove_radiobuttons(self):
         self.lists = []
@@ -109,6 +114,8 @@ class ScrollableFrameList(ctk.CTkScrollableFrame):
     def radiobutton_event(self):
         self.radio_frame_task.remove_radiobuttons()
         self.radio_frame_task.add_radiobuttons()
+        self.task_details.clear_task_details()
+
 
 
 class ScrollableFrameTask(ctk.CTkScrollableFrame):
@@ -135,11 +142,26 @@ class ScrollableFrameTask(ctk.CTkScrollableFrame):
         task_rows = todo_db.get_all_tasks(list_id)
 
         for t in task_rows:
-            self.tasks.append((t.id,t.list_id,t.name))
+            self.tasks.append((t.id,t.list_id,t.name, t.deadline, t.status))
 
         for i, t in enumerate(self.tasks):
-            radiobutton = ctk.CTkRadioButton(self, text=t[2], value=t[0], command=self.radiobutton_event
-                                             , variable=self.variable)
+            date_and_name = f'{t[3]} : {t[2]}'
+            task_deadline = t[3]
+            task_status = t[4]
+            current_date = datetime.now().date()
+            if task_status == '1':
+                radiobutton = ctk.CTkRadioButton(self, text=date_and_name, value=t[0],
+                                                 command=self.radiobutton_event,
+                                                 variable=self.variable, text_color='green')
+            else:
+                if task_deadline and current_date > task_deadline:
+                    radiobutton = ctk.CTkRadioButton(self, text=date_and_name, value=t[0],
+                                                     command=self.radiobutton_event,
+                                                     variable=self.variable, text_color='red')
+                else:
+                    radiobutton = ctk.CTkRadioButton(self, text=date_and_name, value=t[0],
+                                                     command=self.radiobutton_event,
+                                                     variable=self.variable)
             radiobutton.grid(row=i, column=0, padx=5, pady=(5, 0), sticky="w")
             self.radiobuttons.append(radiobutton)
 
@@ -202,6 +224,8 @@ class DetailsFrameTask(ctk.CTkFrame):
         task_deadline = self.task_deadline.get()
         if task_id:
             todo_db.update_task(task_id, task_description, task_status, task_priority, task_deadline)
+        self.radio_frame_task.remove_radiobuttons()
+        self.radio_frame_task.add_radiobuttons()
 
 class MainFrameForList(ctk.CTkFrame):
     def __init__(self, master, title):
@@ -222,6 +246,7 @@ class MainFrameForList(ctk.CTkFrame):
     def set_main_task_frame(self, main_task_frame):
         self.main_task_frame = main_task_frame
         self.radio_frame_list.set_radio_frame_task(self.main_task_frame.radio_frame_task)
+        self.radio_frame_list.set_task_details(self.main_task_frame.task_details)
         self.buttons_frame_list.set_radio_frame_task(self.main_task_frame.radio_frame_task)
 
 
@@ -265,6 +290,7 @@ class TODOapp(ctk.CTk):
         self.main_task_frame = MainFrameForTask(self, title="Tasks", main_list_frame = self.main_list_frame)
         self.main_list_frame.set_main_task_frame(self.main_task_frame)
         self.main_task_frame.grid(column=1, row=0, padx=(5,10), pady=(10, 10), sticky='nsew',columnspan=3)
+
 
 
 

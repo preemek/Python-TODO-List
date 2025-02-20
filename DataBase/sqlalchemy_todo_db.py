@@ -41,7 +41,10 @@ class TODO_db:
 
     def get_all_tasks(self, list_id):
         with Session(self.engine) as session:
-            tasks = session.query(self.Task).filter(self.Task.list_id == list_id).all()
+            tasks = session.query(
+                self.Task).filter(
+                self.Task.list_id == list_id) .order_by(
+                self.Task.deadline, self.Task.name).all()
         return tasks
 
     def get_task(self, task_id):
