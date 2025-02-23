@@ -33,14 +33,17 @@ class task_list:
     def modify_title (self,title:str): 
         """if title is already in list_of_tasks, add number to it"""
         i=2
-        if title in self.list_of_tasks:
+        list_of_names=[]
+        for task in self.list_of_tasks:
+            list_of_names.append(task.title)
+        if title in list_of_names:
             title = title +" (" + str(i) + ")"
         else:
             return title
 
         while True:
             i+=1 
-            if title in self.list_of_tasks:
+            if title in list_of_names:
                 x=title.rfind(" (")
                 new_title = title[:x] +" (" + str(i) + ")"
 
@@ -84,7 +87,6 @@ class task_list:
             self.list_of_tasks.sort(key=lambda x:sort_key(x.completion_date,x),reverse=reverse)
 
 # a=task_list()
-
 """
 # <date> < time.strftime("%Y-%m-%d") current date is bigger than <date>, your task is late
 # <date> == time.strftime("%Y-%m-%d") current date is the same as <date>, your task was scheduled for today
