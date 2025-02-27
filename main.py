@@ -3,31 +3,9 @@ import json
 import tkinter as tk
 from tkinter import messagebox
 from datetime import datetime
+from task import Task
 
 ZADANIA = "zadania.json"
-
-class Task:
-    def __init__(self, title, description, deadline, status=False):
-        self.title = title
-        self.description = description
-        self.deadline = deadline
-        self.status = status
-
-    def mark_as_done(self):
-        self.status = True
-
-    def to_dict(self):
-        return {
-            "title": self.title,
-            "description": self.description,
-            "deadline": self.deadline,
-            "status": self.status
-        }
-
-    @staticmethod
-    def from_dict(data):
-        return Task(data["title"], data["description"], data["deadline"], data["status"])
-
 
 class ToDoListApp:
     def __init__(self, root):
@@ -38,6 +16,7 @@ class ToDoListApp:
 
         self.task_listbox = tk.Listbox(root, width=50, height=15)
         self.task_listbox.pack(pady=10)
+        self.task_listbox.bind("<Double-Button-1>", self.show_task_details)  # Обработчик двойного клика
 
         self.add_button = tk.Button(root, text="Dodaj zadanie", command=self.add_task)
         self.add_button.pack(pady=5)
@@ -55,6 +34,13 @@ class ToDoListApp:
         for i, task in enumerate(self.tasks):
             status = "✅" if task.status else "❌"
             self.task_listbox.insert(tk.END, f"{i}. {task.title} (do {task.deadline}) {status}")
+
+    def show_task_details(self, event):
+        selected = self.task_listbox.curselection()
+        if selected:
+            index = selected[0]
+            task = self.tasks[index]
+            messagebox.showinfo("Opis zadania", f"📌 {task.title}\n\n{task.description}\n\n🗓 Deadline: {task.deadline}")
 
     def add_task(self):
         add_window = tk.Toplevel(self.root)
