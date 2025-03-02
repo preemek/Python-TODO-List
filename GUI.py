@@ -119,7 +119,8 @@ class PyToDoList:
                 # delete all added widgets
                 Entry_Title.destroy()
                 ComBox_Priority.destroy()
-                Finish_btt.destroy()
+                Finish_btt1.destroy()
+                Finish_btt2.destroy()
                 Date_frame.destroy()
                 Description.delete('1.0',tk.END)
                 Description.config(state="disabled")
@@ -175,10 +176,10 @@ class PyToDoList:
             ComBox_Priority.config(state="readonly")
             ComBox_Priority.grid(row=0,column=4)
             
-            Finish_btt=ttk.Button(frame,text="finish",command=lambda:fisnish_adding_task(False))
-            Finish_btt.grid(row=3,column=5)
-            Finish_btt=ttk.Button(frame,text="close",command=lambda:fisnish_adding_task(True))
-            Finish_btt.grid(row=3,column=4)
+            Finish_btt1=ttk.Button(frame,text="finish",command=lambda:fisnish_adding_task(False))
+            Finish_btt1.grid(row=3,column=5)
+            Finish_btt2=ttk.Button(frame,text="close",command=lambda:fisnish_adding_task(True))
+            Finish_btt2.grid(row=3,column=4)
 
 
 
