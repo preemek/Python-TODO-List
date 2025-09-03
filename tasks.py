@@ -18,7 +18,7 @@ class task:
 class task_list:
     def __init__(self):
         self.list_of_tasks:list[task]=[]
-        with open("Python-TODO-List\data.json", "r") as file:
+        with open(r"Python-TODO-List\data.json", "r") as file:
             loaded_data = json.load(file)
             for dict in loaded_data:
                 self.add_task(dict["title"],dict["description"],dict["completion_date"],dict["priority"],dict["completion"])
@@ -27,7 +27,7 @@ class task_list:
         data=[]
         for task in self.list_of_tasks:
             data.append(task.__dict__)
-        with open("Python-TODO-List\data.json", "w", encoding="UTF-8") as outfile:
+        with open(r"Python-TODO-List\data.json", "w", encoding="UTF-8") as outfile:
             json.dump(data, outfile)
 
     def modify_title (self,title:str): 
